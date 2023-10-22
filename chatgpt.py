@@ -100,8 +100,8 @@ def get_response(incoming_msg):
                     friendly_time = "just now"
         
         # Add this text to the context, including both time representations
-        context += f'{text["user"]} told your boss "{text["text"]}" {friendly_time} ({exact_time}).\n'
-    context += f'\nYour boss asks you "{incoming_msg}"'
+        context += f'{text["user"]} told said "{text["text"]}" {friendly_time} ({exact_time}).\n'
+    context += f'\nI want to know "{incoming_msg}"'
 
     print(context)
     data = []
