@@ -14,6 +14,7 @@ def home():
 import json
 @app.route("/get", methods=["GET", "POST"])
 def gpt_response():
+    print("recieved")
     userText = request.args.get('msg')
     userId = request.args.get('userId') # if no userid it will be none, this will be fine
     return json.dumps((get_response(userText, userId)))

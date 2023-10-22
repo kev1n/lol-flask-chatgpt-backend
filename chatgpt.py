@@ -55,8 +55,8 @@ def get_response(incoming_msg, userId=None):
                     friendly_time = "just now"
         
         # Add this text to the context, including both time representations
-        context += f'{text["user"]} told said "{text["text"]}" {friendly_time} ({exact_time}).\n'
-    context += f'\n "Prompt: {incoming_msg}"' #I want to know
+        context += f'{text["user"]} said to me "{text["text"]}" {friendly_time}.\n'
+    context += f'\n Based on this context, if relevant, I would like to ask: "{incoming_msg}"' #I want to know
 
     print(context)
     data = []
