@@ -4,65 +4,20 @@ import time
 import openai
 from flask import jsonify
 from datetime import datetime, timedelta
+from context_texts import get_context_texts
 
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-systemPrompt = { "role": "system", "content": "You are a helpful assistant." }
+systemPrompt = { "role": "system", "content": "You are a helpful assistant that helps look through my text messages." }
+# You are a helpful assistant
 
-def get_response(incoming_msg):
-    sampleTexts = [
-      {
-        "text": 'Happy Birthday! Hope your day is as amazing as you are!',
-        "user": 'JohnDoe',
-        "timestamp": 1671619200
-      },
-      {
-        "text": 'Wishing you all the happiness on your special day! 🎉',
-        "user": 'JaneDoe',
-        "timestamp": 1671622800, 
-      },
-      {
-        "text": "HBD! Can't wait to celebrate with you tonight!",
-        "user": 'Mike_Smith',
-        "timestamp": 1671626400, 
-      },
-      {
-        "text": 'Haha, I still hate you',
-        "user": 'SarahP',
-        "timestamp": 1671630000, 
-      },
-      {
-        "text": "Happy Birthday! Let's make this year the best one yet!",
-        "user": 'Tom_Jones',
-        "timestamp": 1671633600, 
-      },
-      {
-        "text": 'Another year older, wiser, and even more awesome. Happy Birthday!',
-        "user": 'JenniferM',
-        "timestamp": 1671637200, 
-      },
-      {
-        "text": 'Hope your birthday is just the beginning of a year full of happiness!',
-        "user": 'AlexW',
-        "timestamp": 1671640800, 
-      },
-      {
-        "text": 'Have a wonderful birthday, my dear! You deserve all the joy in the world 🎈',
-        "user": 'ChrisF',
-        "timestamp": 1671644400, 
-      },
-      {
-        "text": 'Happy Birthday! 🎁 Enjoy this day to the fullest!',
-        "user": 'PatriciaH',
-        "timestamp": 1671648000, 
-      },
-      {
-        "text": 'Worst wishes on your birthday! I hate you still!',
-        "user": 'Bill_S',
-        "timestamp": 1671651600, 
-      },
-    ]
+
+
+def get_response(incoming_msg, userId=None):
+
+    context_texts = get_context_texts(userId)
+
     # Function to format the month day as 1st, 2nd, 3rd, etc.
     def suffix(d):
         return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
@@ -73,9 +28,9 @@ def get_response(incoming_msg):
     # Current time
     current_time = datetime.now()
 
-    context = "Here is the context of the relevant messages that your boss sent.\n"
+    context = "Here is the context of the relevant messages.\n" # that your boss sent
 
-    for text in sampleTexts:
+    for text in context_texts:
         # Convert the timestamp to a datetime object
         message_time = datetime.fromtimestamp(text["timestamp"])
         
@@ -101,7 +56,7 @@ def get_response(incoming_msg):
         
         # Add this text to the context, including both time representations
         context += f'{text["user"]} told said "{text["text"]}" {friendly_time} ({exact_time}).\n'
-    context += f'\nI want to know "{incoming_msg}"'
+    context += f'\n "Prompt: {incoming_msg}"' #I want to know
 
     print(context)
     data = []
@@ -111,13 +66,13 @@ def get_response(incoming_msg):
     messages.extend(data)
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo", # could change to high token limit model
             messages=messages
         )
         content = response["choices"][0]["message"]["content"]
         data = { 
             "response": content,
-            "texts": sampleTexts 
+            "texts": context_texts 
         } 
         return data
     except openai.error.RateLimitError as e:
